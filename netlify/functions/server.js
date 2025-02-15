@@ -38,7 +38,7 @@ mongoose
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // ✅ Fix: Use Express Router instead of `app`
-router.get("/", (req, res) => {
+router.get("/api", (req, res) => {
   res.json({ message: "Welcome to Outh Game API on Netlify!" });
 });
 
