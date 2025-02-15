@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
+const serverless = require("serverless-http");
 
 // init app
 const app = express();
@@ -21,12 +22,12 @@ app.use(express.json());
 // MongoDB Connexion
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connecté ✅"))
-  .catch((err) => console.error("Erreur de connexion à MongoDB ❌", err));
+  .then(() => console.log("MongoDB connected "))
+  .catch((err) => console.error("Error connexion to MongoDB ", err));
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("Bienvenue sur Outh Game API !");
+  res.send("welcom on Game API !");
 });
 
 // running the server
