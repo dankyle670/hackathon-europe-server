@@ -8,7 +8,7 @@ const serverless = require("serverless-http");
 require("dotenv").config();
 
 const app = express();
-const router = express.Router(); // ✅ Fix: Use an Express Router
+const router = express.Router(); //  Fix: Use an Express Router
 
 // Middleware
 app.use(bodyParser.json());
@@ -20,25 +20,36 @@ app.use(
   })
 );
 
-// ✅ MongoDB Connection (Fix: Removed Deprecated Options)
+//  MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error(" MongoDB connection error:", err.message);
     process.exit(1);
   });
 
-// ✅ Fix: Mount API under `/api`
+//  Define `UserModel` Before Using It
+const userSchema = new mongoose.Schema({
+  first_name: { type: String, required: true },
+  last_name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const UserModel = mongoose.model("User", userSchema); //  Move this above the signup route
+
+//  Test Route
 router.get("/", (req, res) => {
-  console.log("📌 GET /api hit");
+  console.log(" GET /api hit");
   res.json({ message: "Welcome to Outh Game API on Netlify!" });
 });
 
-// ✅ User Signup Route
+// ✅ User Signup Route (Fix: Ensure `UserModel` is accessible)
 router.post("/signup", async (req, res) => {
   try {
-    console.log("📌 POST /api/signup hit with data:", req.body);
+    console.log(" POST /api/signup hit with data:", req.body);
 
     const { first_name, last_name, email, password } = req.body;
 
@@ -57,7 +68,7 @@ router.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
-    console.log("✅ New user created:", newUser);
+    console.log("New user created:", newUser);
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
@@ -65,13 +76,13 @@ router.post("/signup", async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
-    console.error("❌ Signup error:", error);
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Apply Router to Netlify Functions
+//  Apply Router to Netlify Functions
 app.use("/.netlify/functions/server/api", router);
 
-// ✅ Export for Netlify Functions
+// Export for Netlify Functions
 module.exports.handler = serverless(app);
