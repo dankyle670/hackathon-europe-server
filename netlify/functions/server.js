@@ -8,6 +8,7 @@ const serverless = require("serverless-http");
 require("dotenv").config();
 
 const app = express();
+const router = express.Router(); // ✅ Fix: Use an Express Router
 
 // Middleware
 app.use(bodyParser.json());
@@ -19,38 +20,31 @@ app.use(
   })
 );
 
-// MongoDB User Schema
-const userSchema = new mongoose.Schema({
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-});
-
-const UserModel = mongoose.model("User", userSchema);
-
-// ✅ FIXED: MongoDB Connection (Removed Deprecated Options)
+// ✅ MongoDB Connection (Fix: Removed Deprecated Options)
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1); // Stop the server if MongoDB fails
+    process.exit(1);
   });
 
-// ✅ Test Route
-app.get("/api", (req, res) => {
-  res.json({ message: "Welcome to Outh Game API!" });
+// ✅ Fix: Mount API under `/api`
+router.get("/", (req, res) => {
+  console.log("📌 GET /api hit");
+  res.json({ message: "Welcome to Outh Game API on Netlify!" });
 });
 
 // ✅ User Signup Route
-app.post("/api/signup", async (req, res) => {
+router.post("/signup", async (req, res) => {
   try {
+    console.log("📌 POST /api/signup hit with data:", req.body);
+
     const { first_name, last_name, email, password } = req.body;
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
+      console.log("⚠️ User already exists:", email);
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -63,6 +57,8 @@ app.post("/api/signup", async (req, res) => {
     });
 
     await newUser.save();
+    console.log("✅ New user created:", newUser);
+
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
@@ -74,12 +70,8 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-// ✅ Handle both local and serverless deployments
-if (process.env.NODE_ENV === "development") {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-} else {
-  module.exports.handler = serverless(app);
-}
+// ✅ Apply Router to Netlify Functions
+app.use("/.netlify/functions/server/api", router);
+
+// ✅ Export for Netlify Functions
+module.exports.handler = serverless(app);
