@@ -3,13 +3,12 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const serverless = require("serverless-http");
-const authRoutes = require("./authRoutes"); // Import auth routes
+const authRoutes = require("./authRoutes"); // Import authentication routes
 require("dotenv").config();
 
 const app = express();
-const router = express.Router();
 
-//  Middleware
+// ✅ Middleware
 app.use(bodyParser.json());
 app.use(
   cors({
@@ -19,7 +18,7 @@ app.use(
   })
 );
 
-// MongoDB Connection
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))
@@ -28,16 +27,14 @@ mongoose
     process.exit(1);
   });
 
-// Test Route
-router.get("/", (req, res) => {
+// ✅ Test Route
+app.get("/api", (req, res) => {
   console.log("📌 GET /api hit");
   res.json({ message: "Welcome to Outh Game API on Netlify!" });
 });
 
-// Apply Routes
-router.use(authRoutes); // Register auth routes
+// ✅ Fix: Ensure `/api` prefix is applied to auth routes
+app.use("/api", authRoutes); // Mount authRoutes under `/api`
 
-app.use("/.netlify/functions/server/api", router);
-
-// Export for Netlify Functions
+// ✅ Export for Netlify
 module.exports.handler = serverless(app);
