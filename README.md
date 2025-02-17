@@ -47,8 +47,8 @@ backend/
 
 1️⃣ Clone the repository
 
-# git clone https://github.com/yourusername/outh-game-backend.git
-# cd outh-game-backend
+# git clone git@github.com:dankyle670/hackathon-europe-server.git
+# cd hackathon-europe-server
 
 2️⃣ Install dependencies
 
