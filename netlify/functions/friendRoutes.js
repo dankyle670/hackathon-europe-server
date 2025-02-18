@@ -54,27 +54,24 @@ router.put("/friend-request/:requestId/accept", authMiddleware, async (req, res)
   }
 });
 
-// Reject Friend Request
+// Reject Friend Reques
 router.put("/friend-request/:requestId/reject", authMiddleware, async (req, res) => {
-  try {
-    const { requestId } = req.params;
-    const request = await FriendshipModel.findById(requestId);
-
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
+    try {
+      const { requestId } = req.params;
+      const request = await FriendshipModel.findById(requestId);
+      if (!request) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      if (request.receiverId.toString() !== req.user.userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      await FriendshipModel.findByIdAndDelete(requestId);
+      res.status(200).json({ message: "Friend request rejected!" });
+    } catch (error) {
+      console.error("Reject request error:", error);
+      res.status(500).json({ message: "Server error" });
     }
-
-    if (request.receiverId.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    await FriendshipModel.findByIdAndDelete(requestId);
-    res.status(200).json({ message: "Friend request rejected!" });
-  } catch (error) {
-    console.error("Reject request error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+  });
 
 // Cancel Sent Friend Request
 router.delete("/friend-request/:receiverId/cancel", authMiddleware, async (req, res) => {
