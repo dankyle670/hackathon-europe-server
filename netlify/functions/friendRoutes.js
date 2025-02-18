@@ -54,7 +54,7 @@ router.put("/friend-request/:requestId/accept", authMiddleware, async (req, res)
   }
 });
 
-// Reject Friend Reques
+// Reject Friend Request
 router.put("/friend-request/:requestId/reject", authMiddleware, async (req, res) => {
     try {
       const { requestId } = req.params;
@@ -102,7 +102,7 @@ router.get("/friend-requests/pending", authMiddleware, async (req, res) => {
       }).populate("senderId", "first_name last_name email");
       res.status(200).json({ count: pendingRequests.length, pendingRequests });
     } catch (error) {
-      console.error("❌ Fetch pending friend requests error:", error);
+      console.error("Fetch pending friend requests error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
