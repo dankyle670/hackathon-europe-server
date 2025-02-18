@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
 
   // Accept game invite
   socket.on("accept-invite", (data) => {
-    console.log(`✅ Game accepted by ${data.receiverId}`);
+    console.log(`Game accepted by ${data.receiverId}`);
 
     const senderSocketId = activeUsers.get(data.senderId);
     if (senderSocketId) {
@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
 
   //  Handle user disconnection
   socket.on("disconnect", () => {
-    console.log(`❌ User disconnected: ${socket.id}`);
+    console.log(`User disconnected: ${socket.id}`);
     activeUsers.forEach((value, key) => {
       if (value === socket.id) {
         activeUsers.delete(key);

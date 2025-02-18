@@ -5,7 +5,7 @@ const authMiddleware = require("./middleware/authMiddleware");
 
 const router = express.Router();
 
-// ✅ Send Friend Request
+// Send Friend Request
 router.post("/friend-request/:receiverId", authMiddleware, async (req, res) => {
   try {
     const { receiverId } = req.params;
@@ -25,12 +25,12 @@ router.post("/friend-request/:receiverId", authMiddleware, async (req, res) => {
 
     res.status(201).json({ message: "Friend request sent!" });
   } catch (error) {
-    console.error("❌ Friend request error:", error);
+    console.error("Friend request error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Accept Friend Request
+// Accept Friend Request
 router.put("/friend-request/:requestId/accept", authMiddleware, async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -49,12 +49,12 @@ router.put("/friend-request/:requestId/accept", authMiddleware, async (req, res)
 
     res.status(200).json({ message: "Friend request accepted!" });
   } catch (error) {
-    console.error("❌ Accept request error:", error);
+    console.error("Accept request error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Reject Friend Request
+// Reject Friend Request
 router.put("/friend-request/:requestId/reject", authMiddleware, async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -71,12 +71,12 @@ router.put("/friend-request/:requestId/reject", authMiddleware, async (req, res)
     await FriendshipModel.findByIdAndDelete(requestId);
     res.status(200).json({ message: "Friend request rejected!" });
   } catch (error) {
-    console.error("❌ Reject request error:", error);
+    console.error("Reject request error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Cancel Sent Friend Request
+// Cancel Sent Friend Request
 router.delete("/friend-request/:receiverId/cancel", authMiddleware, async (req, res) => {
   try {
     const { receiverId } = req.params;
@@ -91,25 +91,26 @@ router.delete("/friend-request/:receiverId/cancel", authMiddleware, async (req, 
     await FriendshipModel.findByIdAndDelete(request._id);
     res.status(200).json({ message: "Friend request canceled!" });
   } catch (error) {
-    console.error("❌ Cancel request error:", error);
+    console.error("Cancel request error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Get Pending Friend Requests
+//  Get Pending Friend Requests with Count
 router.get("/friend-requests/pending", authMiddleware, async (req, res) => {
-  try {
-    const pendingRequests = await FriendshipModel.find({ receiverId: req.user.userId, status: "pending" })
-      .populate("senderId", "first_name last_name email");
+    try {
+      const pendingRequests = await FriendshipModel.find({
+        receiverId: req.user.userId,
+        status: "pending",
+      }).populate("senderId", "first_name last_name email");
+      res.status(200).json({ count: pendingRequests.length, pendingRequests });
+    } catch (error) {
+      console.error("❌ Fetch pending friend requests error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
 
-    res.status(200).json({ pendingRequests });
-  } catch (error) {
-    console.error("❌ Fetch pending friend requests error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// ✅ Get Friends List
+// Get Friends List
 router.get("/friends", authMiddleware, async (req, res) => {
   try {
     const friendships = await FriendshipModel.find({
@@ -127,12 +128,12 @@ router.get("/friends", authMiddleware, async (req, res) => {
 
     res.status(200).json(friends);
   } catch (error) {
-    console.error("❌ Fetch friends error:", error);
+    console.error("Fetch friends error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Remove a Friend
+// Remove a Friend
 router.delete("/friends/:friendId/remove", authMiddleware, async (req, res) => {
   try {
     const { friendId } = req.params;
@@ -151,7 +152,7 @@ router.delete("/friends/:friendId/remove", authMiddleware, async (req, res) => {
 
     res.status(200).json({ message: "Friend removed!" });
   } catch (error) {
-    console.error("❌ Remove friend error:", error);
+    console.error("Remove friend error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

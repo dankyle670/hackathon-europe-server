@@ -1,16 +1,16 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const UserModel = require("./models/UserModel"); // Import UserModel
-const authMiddleware = require("./middleware/authMiddleware"); // ✅ Import the missing middleware
+const UserModel = require("./models/UserModel");
+const authMiddleware = require("./middleware/authMiddleware");
 require("dotenv").config();
 
 const router = express.Router();
 
-// ✅ User Signup Route
+// User Signup Route
 router.post("/signup", async (req, res) => {
   try {
-    console.log("📌 POST /api/signup hit with data:", req.body);
+    console.log("POST /api/signup hit with data:", req.body);
 
     const { first_name, last_name, email, password } = req.body;
 
@@ -29,7 +29,7 @@ router.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
-    console.log("✅ New user created:", newUser);
+    console.log("New user created:", newUser);
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
@@ -37,27 +37,27 @@ router.post("/signup", async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
-    console.error("❌ Signup error:", error);
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ User Login Route
+// User Login Route
 router.post("/login", async (req, res) => {
   try {
-    console.log("📌 POST /api/login hit with data:", req.body);
+    console.log("POST /api/login hit with data:", req.body);
 
     const { email, password } = req.body;
 
     const user = await UserModel.findOne({ email });
     if (!user) {
-      console.log("⚠️ User not found:", email);
+      console.log(" User not found:", email);
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("❌ Password does not match for:", email);
+      console.log("Password does not match for:", email);
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
@@ -67,15 +67,15 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    console.error("❌ Login error:", error);
+    console.error(" Login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ✅ Protected Profile Route (Requires JWT Token)
+// Protected Profile Route (Requires JWT Token)
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    console.log("📌 GET /api/profile hit");
+    console.log(" GET /api/profile hit");
 
     const user = await UserModel.findById(req.user.userId).select("-password");
     if (!user) {
@@ -84,7 +84,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    console.error("❌ Profile fetch error:", error);
+    console.error("Profile fetch error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -94,7 +94,7 @@ router.get("/users", async (req, res) => {
       const users = await UserModel.find({}, "_id first_name last_name email");
       res.status(200).json(users);
     } catch (error) {
-      console.error("❌ Error fetching users:", error);
+      console.error("Error fetching users:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
