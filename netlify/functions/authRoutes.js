@@ -31,16 +31,22 @@ router.post("/signup", async (req, res) => {
     await newUser.save();
     console.log("New user created:", newUser);
 
+    // Include userId in the response
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
-    res.status(201).json({ message: "User registered successfully", token });
+    res.status(201).json({ 
+      message: "User registered successfully", 
+      token,
+      userId: newUser._id   // Include userId here
+    });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // User Login Route
 router.post("/login", async (req, res) => {
@@ -61,16 +67,22 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // ✅ Include userId in the response
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ 
+      message: "Login successful", 
+      token,
+      userId: user._id   // Include userId here
+    });
   } catch (error) {
     console.error(" Login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // Protected Profile Route (Requires JWT Token)
 router.get("/profile", authMiddleware, async (req, res) => {
