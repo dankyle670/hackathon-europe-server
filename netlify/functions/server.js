@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const serverless = require("serverless-http");
 const { createServer } = require("http");
-//const { Server } = require("socket.io");
+const Invite = require("./Invite");
 
 const authRoutes = require("./authRoutes");
 const friendRoutes = require("./friendRoutes");
@@ -12,57 +12,6 @@ require("dotenv").config();
 
 const app = express();
 const server = createServer(app);
-
-//// WebSocket Server (Socket.io)
-//const io = new Server(server, {
-//  cors: {
-//    origin: "*",
-//  },
-//});
-//
-//// Store active users for real-time communication
-//const activeUsers = new Map();
-//
-//io.on("connection", (socket) => {
-//  console.log(`New user connected: ${socket.id}`);
-//
-//  // Register user (store socket with user ID)
-//  socket.on("register", (userId) => {
-//    console.log(`User ${userId} is online with socket ID: ${socket.id}`);
-//    activeUsers.set(userId, socket.id);
-//  });
-//
-//  //  Send a game invite
-//  socket.on("invite", (data) => {
-//    console.log(`Game invite from ${data.senderId} to ${data.receiverId}`);
-//
-//    const receiverSocketId = activeUsers.get(data.receiverId);
-//    if (receiverSocketId) {
-//      io.to(receiverSocketId).emit("receive-invite", data);
-//    }
-//  });
-//
-//  // Accept game invite
-//  socket.on("accept-invite", (data) => {
-//    console.log(`Game accepted by ${data.receiverId}`);
-//
-//    const senderSocketId = activeUsers.get(data.senderId);
-//    if (senderSocketId) {
-//      io.to(senderSocketId).emit("invite-accepted", data);
-//    }
-//  });
-//
-//  //  Handle user disconnection
-//  socket.on("disconnect", () => {
-//    console.log(`User disconnected: ${socket.id}`);
-//    activeUsers.forEach((value, key) => {
-//      if (value === socket.id) {
-//        activeUsers.delete(key);
-//      }
-//    });
-//  });
-//});
-
 //  Middleware
 app.use(bodyParser.json());
 app.use(
@@ -91,6 +40,7 @@ app.use((req, res, next) => {
 // Register API Routes
 app.use("/api", authRoutes);
 app.use("/api", friendRoutes);
+app.use("/api/invites", Invite);
 
 //  Catch-all Route for Undefined Routes (Debugging)
 app.use("*", (req, res) => {
